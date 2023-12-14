@@ -1,0 +1,5 @@
+This is
+the example input file
+for my advent of code 
+template solution
+day00
