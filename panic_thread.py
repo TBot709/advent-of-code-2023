@@ -25,6 +25,9 @@ class PanicThread:
   ONE_MINUTE = 60
   TWO_MINUTES = 120
   FOUR_MINUTES = 240
+  ONE_HOUR = 3600
+  ONE_DAY = 86400000
+  ONE_YEAR = 31556952000
 
   def __init__(self, calling_thread, memory_threshold=ONE_MEGABYTE, time_threshold=TEN_SECONDS):
     self.calling_thread = calling_thread
