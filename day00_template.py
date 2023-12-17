@@ -2,6 +2,7 @@
 
 import sys
 import threading
+import inspect
 from datetime import datetime
 from panic_thread import PanicThread
 
@@ -17,7 +18,10 @@ DEBUG = False
 DEBUG = True
 def debug(msg) -> None:
   if DEBUG:
-    print(msg)
+    lineno = str(inspect.stack()[1].lineno)
+    label = "line    "
+    labelWithLineno = label[0:len(label) - len(lineno)] + lineno
+    print(f"{labelWithLineno}: {msg}")
 start = datetime.now()
 
 # get input lines
@@ -38,6 +42,5 @@ print(0)
 
 # # # # # # PUZZLE SOLUTION END # # # # # # # 
 
-print('finished in ', end='')
-print(datetime.now() - start, end='')
+print(f"finished in {datetime.now() - start}")
 panic_thread.end()
