@@ -94,7 +94,7 @@ for line in lines:
   firstTextIandD = findFirstTextNumberIndexAndDigit(line)
   #print(f"first: {firstIandD} {firstTextIandD}")
   if (firstIandD[1] is None and firstTextIandD[1] is None):
-    raise Error(f"No digits found in {line}")
+    raise Exception(f"No digits found in {line}")
   else:
     if (firstIandD[1] is None or firstIandD[0] > firstTextIandD[0]):
       firstDigit = firstTextIandD[1]

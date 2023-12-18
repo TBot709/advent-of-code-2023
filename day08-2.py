@@ -86,7 +86,7 @@ for c in directionsString:
   elif c == 'L':
     directions.append(left)
   else:
-    raise Error(f"Unexpected direction, {c}")
+    raise Exception(f"Unexpected direction, {c}")
 
 iDirections = 0
 lengthDirections = len(directions)

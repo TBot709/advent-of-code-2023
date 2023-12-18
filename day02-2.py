@@ -66,7 +66,7 @@ def buildRevealsFromString(strReveals):
       elif color == 'green':
         g = int(x)
       else:
-        raise Error(f"Unrecognized color in {countAndColor}")
+        raise Exception(f"Unrecognized color in {countAndColor}")
     reveals.append(Reveal(r,g,b))
   return reveals
 

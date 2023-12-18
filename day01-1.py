@@ -38,11 +38,11 @@ for line in lines:
 
   firstDigit = findDigit(line)
   if (firstDigit is None):
-    raise Error("No digit in line " + line)
+    raise Exception("No digit in line " + line)
 
   lastDigit = findDigit(reverse)
   if (lastDigit is None):
-    raise Error("No digit in line " + reverse)
+    raise Exception("No digit in line " + reverse)
 
   x = int(firstDigit + lastDigit)
   sum += x
