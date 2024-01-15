@@ -19,8 +19,8 @@ def debug(msg) -> None:
 start = datetime.now()
 
 # # # # # # # # # #
-# file = open('day05_example-input.txt','r')
-file = open('day05_input.txt','r')
+# file = open('./day05/day05_example-input.txt','r')
+file = open('./day05/day05_input.txt','r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)

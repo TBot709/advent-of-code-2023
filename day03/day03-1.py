@@ -14,7 +14,7 @@ start = datetime.now()
 # # # # # # # # # #
 
 # open and parse input file
-file = open('day03_input.txt','r')
+file = open('./day03/day03_input.txt','r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
