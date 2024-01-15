@@ -18,7 +18,7 @@ start = datetime.now()
 # # # # # # # # # #
 
 # open and parse input file
-file = open('day02_input.txt','r')
+file = open('./day02/day02_input.txt','r')
 lines = file.readlines()
 file.close()
 

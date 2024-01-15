@@ -22,9 +22,9 @@ start = datetime.now()
 
 # get input lines
 puzzleNumber = "07"
-# file = open(f"day{puzzleNumber}_example-input-2.txt",'r')
-# file = open(f"day{puzzleNumber}_example-input.txt",'r')
-file = open(f"day{puzzleNumber}_input.txt",'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input-2.txt",'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt",'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
