@@ -73,8 +73,11 @@ def count_ways(clues: list[int], row: str) -> int:
     debug(f"\t_count_ways: {'| '*(level)}{clues} {row} {spaceOfOtherClues}")
     while windowEnd <= len(row) - spaceOfOtherClues:
       debug(f"\t     isFit?: {'| '*(level)}{row[windowStart:windowEnd:]} {clueString} {isFit(row[windowStart:windowEnd:], clueString)}")
+      isFillsBefore = any(char == '#' for char in row[0:windowStart:]) if windowStart != 0 else False
+      isFillImmediatelyAfter = row[windowEnd] is '#' if windowEnd < len(row) else False
       if isFit(row[windowStart:windowEnd:], clueString) and \
-            (True if (windowEnd >= len(row) - 1) else (row[windowEnd] is not '#')):
+            not isFillsBefore and \
+            not isFillImmediatelyAfter: 
         # debug(f"\t           : {'| '*(level)}fit")
         nextLevel = level + 1
         nextClues = clues[1::]
@@ -107,6 +110,9 @@ assert(count_ways([1,1,3],".??..??...?##.") == 4)
 assert(count_ways([1,3,1,6],"?#?#?#?#?#?#?#?") == 1)
 assert(count_ways([4,1,1],"????.#...#...") == 1)
 assert(count_ways([1,6,5],"????.######..#####.") == 4)
+assert(count_ways([3,2,1],"?###????????") == 10)
+assert(count_ways([1,1,3,1,1,3,1,1,3,1,1,3,1,1,3],".??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.") == 16384)
+print(count_ways([1,1,3,1,1,3,1,1,3,1,1,3,1,1,3],".??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##."))
 DEBUG = True
 
 # 1 ???.### 1,1,3
@@ -115,7 +121,8 @@ DEBUG = True
 # 1 ????.#...#... 4,1,1
 # 4 ????.######..#####. 1,6,5
 # 10 ?###???????? 3,2,1
-assert(count_ways([3,2,1],"?###????????") == 10)
+# assert(count_ways([3,2,1],"?###????????") == 10)
+# assert(count_ways([1,1,3,1,1,3,1,1,3,1,1,3,1,1,3],".??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.") == 16384)
 
 print(0)
 
