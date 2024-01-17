@@ -5,6 +5,9 @@ import threading
 import inspect
 from datetime import datetime
 from panic_thread import PanicThread
+from debug import debug, setDebug
+
+setDebug(True)
 
 puzzleNumber = "00"
 partNumber = "0"
@@ -17,15 +20,7 @@ panic_thread = PanicThread(
   PanicThread.ONE_HOUR)
 panic_thread.start()
 
-# debug print method
-DEBUG = False
-DEBUG = True
-def debug(msg) -> None:
-  if DEBUG:
-    lineno = str(inspect.stack()[1].lineno)
-    label = "line    "
-    labelWithLineno = label[0:len(label) - len(lineno)] + lineno
-    print(f"{labelWithLineno}: {msg}")
+# start now, include file open in running time
 start = datetime.now()
 
 # get input lines
@@ -43,64 +38,9 @@ print(f"# # # # # #  Running solution for day{puzzleNumber}-{partNumber}  # # # 
 
 # # # # # # PUZZLE SOLUTION START # # # # # #
 
-def remainingSpaceNeeded(clues: list[int]) -> int:
-  r = 0
-  for clue in clues:
-    r += clue
-  return r
+from day12.count_ways import count_ways 
 
-def isFit(s: str, clueString: str) -> bool:
-  isFit = True
-  for i, c in enumerate(s):
-    clueC = clueString[i]
-    if c == '?':
-      continue
-    if c == clueC:
-      continue
-    isFit = False
-    break
-  return isFit
-
-def count_ways(clues: list[int], row: str) -> int:
-  count = 0
-  def _count_ways(clues: list[int], row: str, level=0):
-    nonlocal count
-    clue = clues[0]
-    windowStart = 0
-    windowEnd = clue
-    clueString = '#'*clue
-    spaceOfOtherClues = sum(clues[1::]) if len(clues) > 1 else 0
-    debug(f"\t_count_ways: {'| '*(level)}{clues} {row} {spaceOfOtherClues}")
-    while windowEnd <= len(row) - spaceOfOtherClues:
-      debug(f"\t     isFit?: {'| '*(level)}{row[windowStart:windowEnd:]} {clueString} {isFit(row[windowStart:windowEnd:], clueString)}")
-      isFillsBefore = any(char == '#' for char in row[0:windowStart:]) if windowStart != 0 else False
-      isFillImmediatelyAfter = row[windowEnd] is '#' if windowEnd < len(row) else False
-      if isFit(row[windowStart:windowEnd:], clueString) and \
-            not isFillsBefore and \
-            not isFillImmediatelyAfter: 
-        # debug(f"\t           : {'| '*(level)}fit")
-        nextLevel = level + 1
-        nextClues = clues[1::]
-        nextRow = row[windowEnd + 1::]
-        if len(nextRow) > 0 and len(nextClues) > 0:
-          _count_ways(nextClues, nextRow, nextLevel)
-        else:
-          if '#' in row[windowEnd + 1::]:
-            debug(f"\t           : {'| '*(level)}invalid branch")
-          else:
-            if len(nextClues) == 0:
-              debug(f"\t           : {'| '*(level)}valid branch")
-              count += 1
-      # else:
-        # debug(f"\t           : {'| '*(level)}no fit")
-      windowStart += 1
-      windowEnd += 1
-    debug(f"\t           : {'| '*(level)}end branch")
-  _count_ways(clues, row)
-  debug(f"final count: {count}")
-  return count
-
-DEBUG = False
+setDebug(False)
 assert(count_ways([1],"???") == 3)
 assert(count_ways([1,1],"???") == 1)
 assert(count_ways([1,1,1],"?????") == 1)
@@ -112,19 +52,10 @@ assert(count_ways([4,1,1],"????.#...#...") == 1)
 assert(count_ways([1,6,5],"????.######..#####.") == 4)
 assert(count_ways([3,2,1],"?###????????") == 10)
 assert(count_ways([1,1,3,1,1,3,1,1,3,1,1,3,1,1,3],".??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.") == 16384)
-print(count_ways([1,1,3,1,1,3,1,1,3,1,1,3,1,1,3],".??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##."))
-DEBUG = True
+assert(count_ways([3,2,1,3,2,1,3,2,1,3,2,1,3,2,1],"?###??????????###??????????###??????????###??????????###????????") == 506250)
+setDebug(True)
 
-# 1 ???.### 1,1,3
-# 4 .??..??...?##. 1,1,3
-# 1 ?#?#?#?#?#?#?#? 1,3,1,6
-# 1 ????.#...#... 4,1,1
-# 4 ????.######..#####. 1,6,5
-# 10 ?###???????? 3,2,1
-# assert(count_ways([3,2,1],"?###????????") == 10)
-# assert(count_ways([1,1,3,1,1,3,1,1,3,1,1,3,1,1,3],".??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.?.??..??...?##.") == 16384)
-
-print(0)
+# print(0)
 
 # # # # # # PUZZLE SOLUTION END # # # # # # # 
 

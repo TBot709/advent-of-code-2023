@@ -2,9 +2,12 @@
 
 import sys
 import threading
-import inspect
 from datetime import datetime
 from panic_thread import PanicThread
+from debug import debug, setDebug
+
+setDebug(False)
+setDebug(True)
 
 puzzleNumber = "00"
 partNumber = "0"
@@ -16,15 +19,7 @@ panic_thread = PanicThread(
   PanicThread.TEN_SECONDS)
 panic_thread.start()
 
-# debug print method
-DEBUG = False
-DEBUG = True
-def debug(msg) -> None:
-  if DEBUG:
-    lineno = str(inspect.stack()[1].lineno)
-    label = "line    "
-    labelWithLineno = label[0:len(label) - len(lineno)] + lineno
-    print(f"{labelWithLineno}: {msg}")
+# start now, include file open in running time
 start = datetime.now()
 
 # get input lines
