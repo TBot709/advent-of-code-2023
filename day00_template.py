@@ -6,6 +6,9 @@ import inspect
 from datetime import datetime
 from panic_thread import PanicThread
 
+puzzleNumber = "00"
+partNumber = "0"
+
 # initialize panic thread
 panic_thread = PanicThread(
   threading.current_thread(), 
@@ -25,7 +28,6 @@ def debug(msg) -> None:
 start = datetime.now()
 
 # get input lines
-puzzleNumber = "00"
 file = open(f"day{puzzleNumber}_example-input.txt",'r')
 # file = open(f"day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
@@ -33,10 +35,14 @@ lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
 nColumns = len(lines[0])
 file.close()
-debug(f"rows: {nRows}, columns: {nColumns}")
-debug(f"{lines}")
+# debug(f"rows: {nRows}, columns: {nColumns}")
+# debug(f"{lines}")
+
+print(f"# # # # # #  Running solution for day{puzzleNumber}-{partNumber}  # # # # # #")
 
 # # # # # # PUZZLE SOLUTION START # # # # # #
+
+
 
 print(0)
 

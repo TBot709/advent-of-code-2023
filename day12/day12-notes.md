@@ -87,3 +87,49 @@ Source: Conversation with Bing, 2024-01-15
 (2) Combination Calculator (nCr) | Combinations Generator. https://www.omnicalculator.com/statistics/combination.
 (3) Combinations Calculator (nCr). https://www.calculatorsoup.com/calculators/discretemathematics/combinations.php.
 (4) SQL: Combine Select count (*) from multiple tables. https://stackoverflow.com/questions/1279569/sql-combine-select-count-from-multiple-tables.
+
+## explain nonogram row possibility counter
+
+``` python
+def count_ways(clue, known):
+    n = len(known)
+    dp = [[0]*(len(clue)+1) for _ in range(n+1)]
+    dp[0][0] = 1
+
+    for i in range(n):
+        for j in range(len(clue)+1):
+            debug(f"{i} {j} {dp}")
+            if known[i] != 1 and j > 0 and i+1 >= clue[j-1]:
+                dp[i+1][j] += dp[i+1-clue[j-1]][j-1]
+            if known[i] != 0:
+                if j > 0 and i > 0 and i+1 > clue[j-1] and known[i-clue[j-1]] != 1:
+                    dp[i+1][j] += dp[i-clue[j-1]][j-1]
+                if j == 0 or known[i-1] == 1 or i+1 <= clue[j-1]:
+                    dp[i+1][j] += dp[i][j]
+    debug(f"{i} {j} {dp}")
+    return dp[n][len(clue)]
+
+# debug(count_ways([2,1], [2,2,0,2,1]))
+debug(count_ways([1,1,3], [2,2,2,0,1,1,1]))
+# debug(count_ways([1,1,3], [0,2,2,0,0,2,2,0,0,0,2,1,1]))
+```
+
+Sure, I'd be happy to explain this method in depth. This function `count_ways` is used to solve a problem related to Nonograms, which are picture logic puzzles in which cells in a grid must be colored or left blank according to numbers at the side of the grid to reveal a hidden picture.
+
+Here's a breakdown of the function:
+
+1. **Function Parameters**: The function takes two parameters - `clue` and `known`. `clue` is a list of integers representing the lengths of the blocks of filled cells in the row or column. `known` is a list of integers representing the known cells in the row or column, where 0 is a blank cell, 1 is a filled cell, and 2 is an unknown cell.
+
+2. **Initialization**: The function first initializes a two-dimensional list `dp` with dimensions `(n+1) x (len(clue)+1)`, where `n` is the length of `known`. Each cell `dp[i][j]` will represent the number of ways to fill in the first `i` cells with `j` segments.
+
+3. **Dynamic Programming**: The function then iterates over each cell in `known` and each segment in `clue`. For each cell and segment, it checks the following conditions:
+    - If the current cell is not filled and there is a segment and enough cells left for the segment, it adds the number of ways to fill in the previous cells without the segment to the number of ways to fill in the current cells with the segment.
+    - If the current cell is not blank, it checks two more conditions:
+        - If there is a segment and a previous cell and enough cells left for the segment and the previous cell of the segment is not filled, it adds the number of ways to fill in the previous cells of the segment without the segment to the number of ways to fill in the current cells with the segment.
+        - If there is no segment or the previous cell is filled or not enough cells left for the segment, it adds the number of ways to fill in the previous cells with the segment to the number of ways to fill in the current cells with the segment.
+
+4. **Return Value**: Finally, the function returns the number of ways to fill in all cells with all segments, which is stored in `dp[n][len(clue)]`.
+
+This function uses dynamic programming to efficiently calculate the number of ways to fill in the cells. It breaks down the problem into smaller subproblems (filling in the first `i` cells with `j` segments), and uses the solutions to these subproblems to build up the solution to the original problem. The time complexity of this function is O(n^2 * m), where n is the number of cells and m is the number of segments. The space complexity is O(n * m), which is the size of the `dp` table. 
+
+I hope this helps! If you have any more questions, feel free to ask. 😊
