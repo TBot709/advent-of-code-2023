@@ -4,3 +4,10 @@ __pycache__/
 **/__pycache__/
 *.py[cod]
 *.so
+
+# vim
+.swp
+*.swp
+.swo
+*.swo
+*~
