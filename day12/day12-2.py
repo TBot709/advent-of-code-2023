@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# my correct answer for part two: 4232520187524
+
 import sys
 import threading
 from datetime import datetime
@@ -58,7 +60,7 @@ from day12.count_ways import count_ways
 
 isRepeating5Times = True
 
-for line in lines:
+for i, line in enumerate(lines):
   row, clueString = line.split()
 
   if isRepeating5Times:
@@ -67,7 +69,7 @@ for line in lines:
 
   clues = list(map(lambda s: int(s), clueString.split(',')))
   
-  debug(f"clues:{clues}, row:{row}")
+  debug(f"{i} clues:{clues}, row:{row}")
 
   setDebug(False)
   count = count_ways(clues, row)

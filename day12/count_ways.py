@@ -19,9 +19,13 @@ def isFit(s: str, clueString: str) -> bool:
   return isFit
 
 def count_ways(clues: list[int], row: str) -> int:
-  count = 0
+  cache = {}
   def _count_ways(clues: list[int], row: str, level=0):
-    nonlocal count
+    nonlocal cache
+    if str(clues) + str(row) in cache:
+        debug(f"hit! {clues} {row}")
+        return cache[str(clues) + str(row)]
+    count = 0
     clue = clues[0]
     windowStart = 0
     windowEnd = clue
@@ -41,7 +45,7 @@ def count_ways(clues: list[int], row: str) -> int:
         nextClues = clues[1::]
         nextRow = row[windowEnd + 1::]
         if len(nextRow) > 0 and len(nextClues) > 0:
-          _count_ways(nextClues, nextRow, nextLevel)
+          count += _count_ways(nextClues, nextRow, nextLevel)
         else:
           if '#' in row[windowEnd + 1::]:
             debug(f"\t           : {'| '*(level)}invalid branch")
@@ -54,6 +58,9 @@ def count_ways(clues: list[int], row: str) -> int:
       windowStart += 1
       windowEnd += 1
     debug(f"\t           : {'| '*(level)}end branch")
-  _count_ways(clues, row)
+    cache[str(clues) + str(row)] = count
+    return count
+  count = _count_ways(clues, row)
   debug(f"final count: {count}")
+  debug(f"cache:{cache}")
   return count
