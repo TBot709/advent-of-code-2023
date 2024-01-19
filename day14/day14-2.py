@@ -26,8 +26,8 @@ start = datetime.now()
 # get input lines
 #file = open(f"./day{puzzleNumber}/day{puzzleNumber}_short-example-input-2.txt",'r')
 #file = open(f"./day{puzzleNumber}/day{puzzleNumber}_short-example-input.txt",'r')
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt",'r')
-#file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+#file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt",'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
@@ -164,24 +164,36 @@ iRolls = 0
 iCycles = 0
 iRollFunction = 0
 isCycling = False
+potentialCycle = () # (hash, iRolls, potentialPeriod)
 while iCycles <= nCycles:
     rollFunctions[iRollFunction](grid)
-#    debug(f"after roll {iRolls}, rollFunction {iRollFunction}, cycle {iCycles}: {sGrid(grid)}")
     debug(f"roll {iRolls + 1}, rollFunction {iRollFunction}, cycle {iCycles}")
+    debug(f"\ttotal load = {getTotalLoad(grid)}")
     iRollFunction += 1
     if iRollFunction > nRollFunctions - 1:
         iCycles += 1
         iRollFunction = 0
+
     h = hash(sGrid(grid) + str(iRollFunction))
-    debug(h)
     if not isCycling and (h in gridHashRecord):
-        period = iRolls - gridHashRecord.index(h)
-        debug(f"FOUND CYCLE! {iCycles} {period}")
-        isCycling = True
-        nCycles = (nCycles - iRolls) % len(rollFunctions) 
-        iRolls = 0
-    else:
-        debug(f"total load = {getTotalLoad(grid)}")
+        debug(f"\tPOTENTIAL CYCLE: {iCycles} {h}")
+        if potentialCycle == ():
+            potentialCycle = (h, iRolls, 0)
+            debug(f"\t\tCYCLE CANDIDATE: {potentialCycle}")
+        else:
+            if h == potentialCycle[0]:
+                if potentialCycle[2] == 0:
+                    potentialCycle = (h, iRolls, iRolls - potentialCycle[1])
+                    debug(f"\t\tCYCLE CANDIDATE PERIOD DETERMINED: {potentialCycle}")
+                else:
+                    if potentialCycle[2] == iRolls - potentialCycle[1]:
+                        isCycling = True
+                        iCycles = nCycles - ((nCycles*len(rollFunctions) - iRolls)%potentialCycle[2])//len(rollFunctions)
+                        debug(f"\t\tCYCLE CANDIDATE PERIOD CONFIRMED: {potentialCycle}, jumping to cycle {iCycles}")
+                    else: 
+                        debug(f"\t\tCYCLE CANDIDATE REJECTED: {potentialCycle}")
+                        potentialCycle = ()
+
     iRolls += 1
     gridHashRecord.append(h)
 #    if not isCycling and isCyclingValues(gridHashRecord[-1000::]):
