@@ -73,3 +73,17 @@ def getHasCycle(hashList: list[int], minCycleLength: int) -> bool:
             hashSet.add(hashList[i])
     return False
 print(getHasCycle([1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4],2))
+print(getHasCycle([1,2,3,4,1,2,3,4,1,2,3,4,1,2,3,4],5))
+
+def getIsCyclingValues(l: list) -> bool:
+    n = len(l)
+    for cycle_length in range(1, n):
+        if n % cycle_length == 0:
+            segment = l[:cycle_length]
+            if all(l[i:i+cycle_length] == segment for i in range(cycle_length, n, cycle_length)):
+                return True
+    return False
+print(f"getIsCyclingValues([1,2,3,1,2,3,1,2,3]) -> {getIsCyclingValues([1,2,3,1,2,3,1,2,3])}")
+print(f"getIsCyclingValues([1,2,1,2,3,1,2,3]) -> {getIsCyclingValues([1,2,1,2,3,1,2,3])}")
+print(f"getIsCyclingValues([1,2,1,2,1,2]) -> {getIsCyclingValues([1,2,1,2,1,2])}")
+print(f"getIsCyclingValues([1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6]) -> {getIsCyclingValues([1,2,3,4,5,6,1,2,3,4,5,6,1,2,3,4,5,6])}")

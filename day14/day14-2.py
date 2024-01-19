@@ -10,22 +10,24 @@ setDebug(False)
 setDebug(True)
 
 puzzleNumber = "14"
-partNumber = "1"
+partNumber = "2"
 
 # initialize panic thread
 panic_thread = PanicThread(
   threading.current_thread(), 
   PanicThread.ONE_GIGABYTE, 
-  PanicThread.TEN_SECONDS)
+  #  PanicThread.TEN_SECONDS)
+  PanicThread.ONE_HOUR)
 panic_thread.start()
 
 # start now, include file open in running time
 start = datetime.now()
 
 # get input lines
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_short-example-input.txt",'r')
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt",'r')
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+#file = open(f"./day{puzzleNumber}/day{puzzleNumber}_short-example-input-2.txt",'r')
+#file = open(f"./day{puzzleNumber}/day{puzzleNumber}_short-example-input.txt",'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt",'r')
+#file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
@@ -58,29 +60,135 @@ def sGrid(grid):
     return s
 
 def rollN(grid):
-    iRow = 1
-    for row in grid[1::]:
+    for iRow, row in enumerate(grid):
         for iColumn, c in enumerate(row):
-    #        debug(f"{iRow} {iColumn} {grid[iRow][iColumn]}") 
+#            debug(f"rollN: {iRow} {iColumn} {grid[iRow][iColumn]}") 
             if c == ROLLER:
                 rollDistance = 0
                 currentCell = grid[iRow - 1][iColumn]
                 while iRow - rollDistance > 0 and currentCell == EMPTY:
-    #                debug(f"\t{iRow - (1 + rollDistance)} {iColumn} {currentCell}")
+#                    debug(f"\t{iRow - (1 + rollDistance)} {iColumn} {currentCell}")
                     rollDistance += 1
                     currentCell = grid[iRow - (1 + rollDistance)][iColumn]
                 if rollDistance > 0:
-    #                debug(f"\tmoving {ROLLER} from row {iRow} column {iColumn} to row {iRow - rollDistance}")
+#                    debug(f"\tmoving {ROLLER} from row {iRow} column {iColumn} to row {iRow - rollDistance}")
                     grid[iRow][iColumn] = EMPTY
                     grid[iRow - rollDistance][iColumn] = ROLLER
-        iRow += 1
+
+def rollW(grid):
+    for iRow, row in enumerate(grid):
+        for iColumn, c in enumerate(row):
+#            debug(f"rollW: {iRow} {iColumn} {grid[iRow][iColumn]}") 
+            if c == ROLLER:
+                rollDistance = 0
+                currentCell = grid[iRow][iColumn - 1]
+                while iColumn - rollDistance > 0 and currentCell == EMPTY:
+#                    debug(f"\t{iRow} {iColumn - (1 + rollDistance)} {currentCell}")
+                    rollDistance += 1
+                    currentCell = grid[iRow][iColumn - (1 + rollDistance)]
+                if rollDistance > 0:
+#                    debug(f"\tmoving {ROLLER} from row {iRow} column {iColumn} to column {iColumn - rollDistance}")
+                    grid[iRow][iColumn] = EMPTY
+                    grid[iRow][iColumn - rollDistance] = ROLLER
+ 
+def rollS(grid):
+    iRow = len(grid) - 2 
+    while iRow >= 0:
+        row = grid[iRow]
+        for iColumn, c in enumerate(row):
+#            debug(f"rollN: r{iRow} c{iColumn} {grid[iRow][iColumn]}") 
+            if c == ROLLER:
+                rollDistance = 0
+                currentCell = grid[iRow + 1][iColumn]
+                while currentCell == EMPTY:
+#                    debug(f"\tr{iRow + 1 + rollDistance} c{iColumn} roll{rollDistance} {currentCell}")
+                    rollDistance += 1
+                    if iRow + 1 + rollDistance < len(grid):
+                        currentCell = grid[iRow + 1 + rollDistance][iColumn]
+                    else:
+                        break
+                if rollDistance > 0:
+#                    debug(f"\tmoving {ROLLER} from row {iRow} column {iColumn} to row {iRow + rollDistance}")
+                    grid[iRow][iColumn] = EMPTY
+                    grid[iRow + rollDistance][iColumn] = ROLLER
+        iRow -= 1
+
+def rollE(grid):
+    for iRow, row in enumerate(grid):
+        iColumn = len(row) - 2
+        while iColumn >= 0:
+            c = row[iColumn]
+#            debug(f"rollW: {iRow} {iColumn} {grid[iRow][iColumn]}") 
+            if c == ROLLER:
+                rollDistance = 0
+                currentCell = grid[iRow][iColumn + 1]
+                while currentCell == EMPTY:
+#                    debug(f"\t{iRow} {iColumn + 1 + rollDistance} {currentCell}")
+                    rollDistance += 1
+                    if iColumn + 1 + rollDistance < len(row):
+                        currentCell = grid[iRow][iColumn + 1 + rollDistance]
+                    else:
+                        break
+                if rollDistance > 0:
+#                    debug(f"\tmoving {ROLLER} from row {iRow} column {iColumn} to column {iColumn - rollDistance}")
+                    grid[iRow][iColumn] = EMPTY
+                    grid[iRow][iColumn + rollDistance] = ROLLER
+            iColumn -= 1
+
+def isCyclingValues(l: list) -> bool:
+    n = len(l)
+    for cycle_length in range(1, n):
+        if n % cycle_length == 0:
+            segment = l[:cycle_length]
+            if all(l[i:i+cycle_length] == segment for i in range(cycle_length, n, cycle_length)):
+                return True
+    return False
+
+def getTotalLoad(grid):
+    totalLoad = 0
+    for iRow, row in enumerate(grid):
+        rowLeverage = len(grid) - iRow
+        for iColumn, c in enumerate(row):
+            if c == ROLLER:
+                totalLoad += rowLeverage
+    return totalLoad
 
 debug(f"before rolling: {sGrid(grid)}")
 
+nCycles = 1000000000
+#nCycles = 3 
+rollFunctions = [rollN, rollW, rollS, rollE]
+nRollFunctions = len(rollFunctions)
 gridHashRecord = []
-for i in range(10): 
-    gridHashRecord.append(hash(sGrid(grid)))
-    rollN(grid)
+iRolls = 0
+iCycles = 0
+iRollFunction = 0
+isCycling = False
+while iCycles <= nCycles:
+    rollFunctions[iRollFunction](grid)
+#    debug(f"after roll {iRolls}, rollFunction {iRollFunction}, cycle {iCycles}: {sGrid(grid)}")
+    debug(f"roll {iRolls + 1}, rollFunction {iRollFunction}, cycle {iCycles}")
+    iRollFunction += 1
+    if iRollFunction > nRollFunctions - 1:
+        iCycles += 1
+        iRollFunction = 0
+    h = hash(sGrid(grid) + str(iRollFunction))
+    debug(h)
+    if not isCycling and (h in gridHashRecord):
+        period = iRolls - gridHashRecord.index(h)
+        debug(f"FOUND CYCLE! {iCycles} {period}")
+        isCycling = True
+        nCycles = (nCycles - iRolls) % len(rollFunctions) 
+        iRolls = 0
+    else:
+        debug(f"total load = {getTotalLoad(grid)}")
+    iRolls += 1
+    gridHashRecord.append(h)
+#    if not isCycling and isCyclingValues(gridHashRecord[-1000::]):
+#        isCycling = True
+#        nCycles = (nCycles - iRolls) % len(rollFunctions) 
+#        iRolls = 0
+#        debug(f"found cycle {nCycles} {gridHashRecord[-1000::]}")
 
 debug(f"after rolling: {sGrid(grid)}")
 
