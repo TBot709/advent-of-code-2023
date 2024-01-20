@@ -23,8 +23,8 @@ panic_thread.start()
 start = datetime.now()
 
 # get input lines
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt",'r')
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+#file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt",'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
@@ -37,9 +37,21 @@ print(f"# # # # # #  Running solution for day{puzzleNumber}-{partNumber}  # # # 
 
 # # # # # # PUZZLE SOLUTION START # # # # # #
 
+steps = lines[0].split(",")
 
+def sillyHash(s: str) -> int:
+    r = 0
+    for c in s:
+        r += ord(c)
+        r *= 17
+        r %= 256
+    return r
 
-print(0)
+sum = 0
+for step in steps:
+    sum += sillyHash(step)
+
+print(sum)
 
 # # # # # # PUZZLE SOLUTION END # # # # # # # 
 
