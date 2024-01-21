@@ -61,17 +61,17 @@ for step in steps:
     debug(f"{step} {'=' in step} {'-' in step}")
     if "=" in step:
         splitStep = step.split("=")
-        label = splitStep[0]
-        iBox = sillyHash(label)
+        label = "[" + splitStep[0] + "]"
+        iBox = sillyHash(splitStep[0])
         sBox = boxes[iBox]
         focalLength = splitStep[1]
-        iExistingIndex = sBox.find("," + label + ":") + 1
-        if iExistingIndex == 0:
-            iExistingIndex = sBox.find(label + ":")
+        iExistingIndex = sBox.find(label)
         if iExistingIndex != -1:
             iNextComma = sBox.find(",",iExistingIndex)
             sBox = ((sBox[0:iExistingIndex - 1]) if iExistingIndex > 0 else "") \
                     + ("," if iExistingIndex > 0 and iNextComma != -1 else "") \
+                    + label + ":" + focalLength \
+                    + ("," if iNextComma != -1 else "") \
                     + (sBox[iNextComma + 1::] if iNextComma != -1 else "")
         else:
             if len(sBox) > 0:
@@ -82,16 +82,13 @@ for step in steps:
         debug(f"\tlabel:{label} fl:{focalLength} index:{iExistingIndex} iBox:{iBox} sBox:{sBox}")
     elif "-" in step:
         splitStep = step.split("-")
-        label = splitStep[0]
-        iBox = sillyHash(label)
+        label = "[" + splitStep[0] + "]"
+        iBox = sillyHash(splitStep[0])
         sBox = boxes[iBox]
-        iExistingIndex = sBox.find("," + label + ":") + 1
-        if iExistingIndex == 0:
-            iExistingIndex = sBox.find(label + ":")
+        iExistingIndex = sBox.find(label)
         debug(f"\tlabel:{label} index:{iExistingIndex} iBox:{iBox} sBox:{sBox}")
         if iExistingIndex != -1:
             iNextComma = sBox.find(",",iExistingIndex)
-
             sBox = ((sBox[0:iExistingIndex - 1]) if iExistingIndex > 0 else "") \
                     + ("," if iExistingIndex > 0 and iNextComma != -1 else "") \
                     + (sBox[iNextComma + 1::] if iNextComma != -1 else "")
@@ -106,7 +103,7 @@ sumFocusingPower = 0
 for iBox, box in enumerate(boxes):
     if len(box) > 0:
         for iLense, lense in enumerate(box.split(",")):
-            debug(f"{iBox} {box} {iLense} {lense}")
+            debug(f"{iBox} {box} {iLense} {lense} {lense.split(':')}")
             fp = iBox + 1
             fp *= iLense + 1 
             fp *= int(lense.split(":")[1])
