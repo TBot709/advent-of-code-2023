@@ -37,7 +37,63 @@ print(f"# # # # # #  Running solution for day{puzzleNumber}-{partNumber}  # # # 
 
 # # # # # # PUZZLE SOLUTION START # # # # # #
 
+class Cell:
+    # Cell(".") 
+    def __init__(self, tileChar):
+        self.tileChar = tileChar
+        self.activeCount = 0
 
+NORTH = "N"
+EAST = "E"
+SOUTH = "S"
+WEST = "W"
+class Beam:
+    # Beam(0, 0, "E")
+    def __init__(self, x, y, directionChar):
+        self.x = x
+        self.y = y
+        self.directionChar = directionChar
+    def move(self):
+        if directionChar == NORHT:
+            self.y -= 1
+        elif directionChar == EAST:
+            self.x += 1
+        elif directionChar == SOUTH:
+            self.y += 1
+        elif directionChar == WEST:
+            self.x -= 1
+    def isOutOfBounds(self):
+        return self.x < 0 or self.y < 0 or \
+                self.x > nColumns or self.y > nRows
+
+cells = []
+for line in lines:
+    lineOfCells = []
+    for cellChar in line:
+        lineOfCells.append(Cell(cellChar))
+    cells.append(lineOfCells)
+
+def sCells(cells) -> str:
+    s = "\n"
+    for line in cells:      
+        for cell in line:
+            s += f"{cell.tileChar}"
+        s += "\n"
+    return s
+
+debug(sCells(cells))     
+
+beams = []
+beams.append(Beam(0, 0, EAST))
+while len(beams) > 0:
+    for iBeam, beam in enumerate(beams):
+        cells[beam.x][beam.y].activeCount += 1
+        tileChar = cells[beam.x][beam.y].tileChar
+        if tileChar = ".":
+            beam.move()    
+        elif tileChar = 
+        if beam.isOutOfBounds:
+            beams.pop(iBeam)
 
 print(0)
 
