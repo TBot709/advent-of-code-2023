@@ -6,7 +6,12 @@ else
 endif
 
 " open config files
-e ~/.config/nvim/init.vim 
+if has('win32') || has('win64')
+    e ~/AppData/Local/nvim/init.vim
+    vnew ~/AppData/Local/nvim/ginit.vim
+else
+    e ~/.config/nvim/init.vim 
+endif
 vnew local-init.vim
 
 " open current project files
@@ -16,7 +21,7 @@ vnew day17/day17-1.py
 " macros
 let @d = "GV/DELETE BELOW THIS LINE\<CR>jx\<ESC>"
 let @c = "^i# \<ESC>"
-let @u = "V/^# \<CR>x\<ESC>"
+let @u = "V:s/^# //g\<CR>"
 
 let g:ale_fixers = {
 \	'python': ['black']
