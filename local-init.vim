@@ -13,7 +13,11 @@ vnew local-init.vim
 tabe temp.txt
 vnew day17/day17-1.py
 
-" fixers
+" macros
+let @d = "GV/DELETE BELOW THIS LINE\<CR>jx\<ESC>"
+let @c = "^i# \<ESC>"
+let @u = "V/^# \<CR>x\<ESC>"
+
 let g:ale_fixers = {
 \	'python': ['black']
 \}

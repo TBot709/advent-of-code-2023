@@ -105,11 +105,9 @@ for iLine, line in enumerate(grid):
             adjMatrix[cell][adjCell] = cost
 
 import heapq
-
-
 def dijkstra(adj_list, start):
-    distances = {node: float('inf') for node in adj_list}
-    distances[start] = 0
+    rtrn = {node: (float('inf'), (-1,-1)) for node in adj_list}
+    rtrn[start] = (0, start)
 
     # Priority queue to track nodes and current shortest distance
     priority_queue = [(0, start)]
@@ -119,25 +117,44 @@ def dijkstra(adj_list, start):
         current_distance, current_node = heapq.heappop(priority_queue)
 
         # Skip if a shorter distance to current_node is already found
-        if current_distance > distances[current_node]:
+        if current_distance > rtrn[current_node][0]:
             continue
 
-        # Explore neighbors and update distances if a shorter path is found
+        # Explore neighbors and update rtrn if a shorter path is found
         for neighbor, weight in adj_list[current_node].items():
             distance = current_distance + weight
 
             # If shorter path to neighbor is found, update distance and push to queue
-            if distance < distances[neighbor]:
-                distances[neighbor] = distance
+            if distance < rtrn[neighbor][0]:
+                rtrn[neighbor] = (distance, current_node)
                 heapq.heappush(priority_queue, (distance, neighbor))
-    return distances
+    return rtrn
 
+def sDijkstraReturn(d):
+    if not d:
+        return "The dictionary is empty."
 
-debug(dijkstra(adjMatrix, (0, 0)))
+    min_x = min(x for x, y in d.keys())
+    max_x = max(x for x, y in d.keys())
+    min_y = min(y for x, y in d.keys())
+    max_y = max(y for x, y in d.keys())
+
+    s = "\n"
+    for y in range(min_y, max_y + 1):
+        for x in range(min_x, max_x + 1):
+            s += f"[({x}, {y}), " + str(d.get((x, y), '#')) + '] '
+        s += '\n'
+    return s
+
+d = dijkstra(adjMatrix, (0, 0))
 
 debug(adjMatrix)
+debug(d)
+debug(sDijkstraReturn(d))
 
-print(0)
+minHeatLoss = d[(nColumns - 1, nRows - 1)][0]
+
+print(minHeatLoss)
 
 # # # # # # PUZZLE SOLUTION END # # # # # # #
 
