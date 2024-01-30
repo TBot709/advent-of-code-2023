@@ -25,11 +25,11 @@ panic_thread.start()
 start = datetime.now()
 
 # get input lines
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_simple-example-input.txt",'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_simple-example-input.txt",'r')
 # file = open(f"./day{puzzleNumber}/day{puzzleNumber}_extra-short-example-input.txt",'r')
 # file = open(f"./day{puzzleNumber}/day{puzzleNumber}_short-example-input.txt",'r')
 # file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt",'r')
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
@@ -110,6 +110,7 @@ NORTH = '^'
 EAST = '>'
 SOUTH = 'v'
 WEST = '<'
+
 
 def getDistanceAndDirection(firstXYTuple, secondXYTuple):
     relativeX = secondXYTuple[0] - firstXYTuple[0]
@@ -195,6 +196,13 @@ def dijkstra(adj_list, start):
             # debug(f"\t{neighbor}, {distanceAndDirection}")
             # skip if direction to this neighbour matched previous jump direction
             if distanceAndDirection[1] == current_node.prevDirection:
+                continue
+
+            # skip if diretion to neighbor is opposite previous direction
+            elif distanceAndDirection[1] == NORTH and current_node.prevDirection == SOUTH or \
+                    distanceAndDirection[1] == EAST and current_node.prevDirection == WEST or \
+                    distanceAndDirection[1] == SOUTH and current_node.prevDirection == NORTH or \
+                    distanceAndDirection[1] == WEST and current_node.prevDirection == EAST:
                 continue
 
             distance = current_distance + weight
