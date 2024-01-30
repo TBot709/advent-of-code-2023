@@ -14,15 +14,16 @@ else
 endif
 vnew local-init.vim
 
-" open current project files
-tabe temp.txt
-vnew day17/day17-1.py
-
 " macros
 let @d = "GV/DELETE BELOW THIS LINE\<CR>jx\<ESC>"
+let @m = "@d/RUN THIS\<CR>jVy/DELETE BELOW THIS LINE\<CR>:\<C-R>\"\<CR>"
 let @c = "^i# \<ESC>"
 let @u = "V:s/^# //g\<CR>"
 
 let g:ale_fixers = {
 \	'python': ['black']
 \}
+
+" open current project files
+tabe temp.txt
+vnew day17/day17-2.py
