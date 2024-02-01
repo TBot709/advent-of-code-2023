@@ -23,3 +23,6 @@ Copy-Item -Path "..\day00\day00_template.py" -Destination "day${n}-2.py"
 New-Item -ItemType File -Force -Path "day${n}_input.txt"
 New-Item -ItemType File -Force -Path "day${n}_example-input.txt"
 
+echo "`nComplete`n"
+ls
+cd ..
