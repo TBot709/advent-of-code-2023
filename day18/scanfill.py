@@ -60,6 +60,7 @@ def scanfill(sGrid: str, edgeChar: str, notEdgeChar: str) -> str:
                 insideFlagGrid[y][x] = True
             # debug(f"{y} {x} {grid[y][x]} {isInside} {insideFlagGrid[y]}")
 
+    '''
     # vertical scan
     for x in range(1, len(grid[0]) - 1):
         isInside = False
@@ -84,6 +85,7 @@ def scanfill(sGrid: str, edgeChar: str, notEdgeChar: str) -> str:
 
             if isInside:
                 insideFlagGrid[y][x] = True
+    '''
 
     s = ""
     for y, line in enumerate(insideFlagGrid):
