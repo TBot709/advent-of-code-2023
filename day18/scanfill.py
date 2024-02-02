@@ -28,14 +28,34 @@ def scanfill(sGrid: str, edgeChar: str, notEdgeChar: str) -> str:
     grid.append(emptyGridLine)
     insideFlagGrid.append(emptyFlagLine.copy())
 
+    NORTH = 'N'
+    EAST = 'E'
+    SOUTH = 'S'
+    WEST = 'W'
+    UNKNOWN = 'U'
+
     # horizontal scan
     for y in range(1, len(grid) - 1):
         isInside = False
+        edgeTailDir = UNKNOWN
         for x in range(1, len(grid[0]) - 1):
-            if grid[y][x - 1] == notEdgeChar and \
-                    grid[y][x] == edgeChar and \
-                    grid[y][x + 1] == notEdgeChar:
+            window = (grid[y][x - 1], grid[y][x], grid[y][x + 1])
+
+            if window == (notEdgeChar, edgeChar, notEdgeChar):
                 isInside = not isInside
+            elif window == (notEdgeChar, edgeChar, edgeChar):
+                if grid[y - 1][x] == edgeChar:
+                    edgeTailDir = NORTH
+                else:
+                    edgeTailDir = SOUTH
+            elif window == (edgeChar, edgeChar, notEdgeChar):
+                # if head and tail are in opposite directions
+                if (grid[y - 1][x] == edgeChar and edgeTailDir == SOUTH
+                        or
+                        grid[y + 1][x] == edgeChar and edgeTailDir == NORTH):
+                    isInside = not isInside
+                edgeTailDir = UNKNOWN
+
             if isInside:
                 insideFlagGrid[y][x] = True
             # debug(f"{y} {x} {grid[y][x]} {isInside} {insideFlagGrid[y]}")
@@ -43,11 +63,25 @@ def scanfill(sGrid: str, edgeChar: str, notEdgeChar: str) -> str:
     # vertical scan
     for x in range(1, len(grid[0]) - 1):
         isInside = False
+        edgeTailDir = UNKNOWN
         for y in range(1, len(grid) - 1):
-            if grid[y - 1][x] == notEdgeChar and \
-                    grid[y][x] == edgeChar and \
-                    grid[y + 1][x] == notEdgeChar:
+            window = (grid[y - 1][x], grid[y][x], grid[y + 1][x])
+
+            if window == (notEdgeChar, edgeChar, notEdgeChar):
                 isInside = not isInside
+            elif window == (notEdgeChar, edgeChar, edgeChar):
+                if grid[y][x + 1] == edgeChar:
+                    edgeTailDir = EAST
+                else:
+                    edgeTailDir = WEST
+            elif window == (edgeChar, edgeChar, notEdgeChar):
+                # if head and tail are in opposite directions
+                if (grid[y][x + 1] == edgeChar and edgeTailDir == WEST
+                        or
+                        grid[y][x - 1] == edgeChar and edgeTailDir == EAST):
+                    isInside = not isInside
+                edgeTailDir = UNKNOWN
+
             if isInside:
                 insideFlagGrid[y][x] = True
 
