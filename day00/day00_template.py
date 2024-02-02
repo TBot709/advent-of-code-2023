@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import threading
-import resource
+# import resource
 from datetime import datetime
 from panic_thread import PanicThread
 from debug import debug, setDebug
@@ -44,6 +44,6 @@ print(0)
 # # # # # # PUZZLE SOLUTION END # # # # # # #
 
 print(f"finished in {datetime.now() - start}")
-peakMemory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-print(f"peak memory: {peakMemory}")
+# peakMemory = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+# print(f"peak memory: {peakMemory}")
 panic_thread.end()
