@@ -18,28 +18,50 @@ def scancount(corners: list[Corner], vEdges: list[Edge]) -> str:
     corners.sort(key=cornerComp)
     # debug(list(map(lambda c: str(c), corners)))
 
+    def edgeCond(e, y, x):
+        isStartAbove = e.start.y < e.end.y
+        if isStartAbove:
+            return e.start.y < y and \
+                    e.end.y > y and \
+                    e.start.x >= x
+        else:
+            return e.end.y < y and \
+                    e.start.y > y and \
+                    e.start.x >= x
+
+    def cornerCond(c, y, x):
+        return c.y == y and c.x >= x
+
+    memoComboCounts = {}  # {hashOfCombo: count}
+
+    def hashCombo(edges, corners):
+        return hash(
+                str(list(map(lambda e: str(e), edges))) +
+                str(list(map(lambda c: str(c), corners))))
+
     count = 0
 
     for y in range(minY - 1, maxY + 1):
+        if y % 10000 == 0:
+            debug(f"y:{y}, count:{count}")
         isInside = False
         prevCornerVertDir = Direction.UNKNOWN
+        countAtStartOfLine = count
+
         x = minX - 1
+        edgesOnLine = list(filter(lambda e: edgeCond(e, y, x), vEdges))
+        # debug(list(map(lambda e: str(e), edgesOnLine)))
+        cornersOnLine = list(filter(lambda c: cornerCond(c, y, x), corners))
+        # debug(list(map(lambda e: str(e), cornersOnLine)))
+        h = hashCombo(edgesOnLine, cornersOnLine)
+        # debug(h)
+        if h in memoComboCounts.keys():
+            # debug(f"REPEAT! {memoComboCounts[h]}")
+            count += memoComboCounts[h]
+            continue
+
         while x < maxX + 1:
-            debug(f"y:{y}, x:{x}, count:{count}")
-
-            def edgeCond(e):
-                isStartAbove = e.start.y < e.end.y
-                if isStartAbove:
-                    return e.start.y < y and \
-                            e.end.y > y and \
-                            e.start.x >= x
-                else:
-                    return e.end.y < y and \
-                            e.start.y > y and \
-                            e.start.x >= x
-
-            def cornerCond(c):
-                return c.y == y and c.x >= x
+            # debug(f"y:{y}, x:{x}, count:{count}")
 
             def getVertDir(corner):
                 return corner.tail if \
@@ -47,8 +69,8 @@ def scancount(corners: list[Corner], vEdges: list[Edge]) -> str:
                     corner.tail == Direction.DOWN else \
                     corner.head
 
-            edge = next((e for e in vEdges if edgeCond(e)), None)
-            corner = next((c for c in corners if cornerCond(c)), None)
+            edge = next((e for e in vEdges if edgeCond(e, y, x)), None)
+            corner = next((c for c in corners if cornerCond(c, y, x)), None)
 
             # debug(f"\tedge:{edge}, corner:{corner}")
 
@@ -92,5 +114,7 @@ def scancount(corners: list[Corner], vEdges: list[Edge]) -> str:
             # debug(f"\tcount:{count}, isInside:{isInside}, x:{x}")
 
         isInside = False
+
+        memoComboCounts[h] = count - countAtStartOfLine
 
     return count

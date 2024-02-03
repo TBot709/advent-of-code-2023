@@ -17,7 +17,6 @@ partNumber = "2"
 panic_thread = PanicThread(
   threading.current_thread(),
   PanicThread.ONE_GIGABYTE,
-  # PanicThread.TEN_SECONDS)
   PanicThread.ONE_HOUR)
 panic_thread.start()
 
@@ -88,7 +87,10 @@ class DigPlanEntry:
 digPlan = []
 for line in lines:
     l_s = line.split()
+
     digPlan.append(DigPlanEntry(l_s[2]))
+
+    # same as day18-1 init, used while debuging shoelace algo
     # digPlan.append(DigPlanEntry(Direction(l_s[0]), int(l_s[1]), l_s[2]))
 
 
