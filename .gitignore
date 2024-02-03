@@ -1,5 +1,8 @@
 temp.txt
+git.log
+git*.log
 git.diff
+git*.diff
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

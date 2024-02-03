@@ -136,13 +136,13 @@ for entry in digPlan:
 if corners[0].tail == Direction.UNKNOWN:
     raise Exception("loop did not complete")
 
-debug("\n" + str(list(map(lambda corner: f"{corner}", corners))))
-debug("\n" + str(list(map(lambda edge: f"{edge}", vEdges))))
-debug("\n" + str(list(map(lambda edge: f"{edge}", hEdges))))
+# debug("\n" + str(list(map(lambda corner: f"{corner}", corners))))
+# debug("\n" + str(list(map(lambda edge: f"{edge}", vEdges))))
+# debug("\n" + str(list(map(lambda edge: f"{edge}", hEdges))))
 
 count = scancount(corners, vEdges)
 
-debug(count)
+# debug(count)
 
 print(count)
 

@@ -15,7 +15,7 @@ endif
 vnew local-init.vim
 
 " macros
-let @d = "GV/DELETE BELOW THIS LINE\<CR>jx\<ESC>"
+let @d = "GV/DELETE BELOW THIS LINE\<CR>jxo\<ESC>"
 let @m = "@d/RUN THIS\<CR>jVy/DELETE BELOW THIS LINE\<CR>:\<C-R>\"\<CR>"
 let @c = "^i# \<ESC>"
 let @u = "V:s/^# //g\<CR>"
