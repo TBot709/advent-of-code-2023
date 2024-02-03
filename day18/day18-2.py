@@ -24,8 +24,8 @@ panic_thread.start()
 start = datetime.now()
 
 # get input lines
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt", 'r')
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt", 'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
@@ -142,9 +142,9 @@ if corners[0].tail == Direction.UNKNOWN:
 
 count = scancount(corners, vEdges)
 
-# debug(count)
+debug(count)
 
-print(count)
+print(count + digCount)
 
 # # # # # # PUZZLE SOLUTION END # # # # # # #
 
