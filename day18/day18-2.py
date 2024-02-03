@@ -17,7 +17,8 @@ partNumber = "2"
 panic_thread = PanicThread(
   threading.current_thread(),
   PanicThread.ONE_GIGABYTE,
-  PanicThread.TEN_SECONDS)
+  # PanicThread.TEN_SECONDS)
+  PanicThread.ONE_HOUR)
 panic_thread.start()
 
 # start now, include file open in running time
@@ -66,19 +67,19 @@ def getDistanceAndDirection(colorString):
 
 
 class DigPlanEntry:
-    '''
     def __init__(self, color: str):
         distanceAndDirection = getDistanceAndDirection(color)
         self.direction = distanceAndDirection[1]
         self.distance = distanceAndDirection[0]
         self.color = color
-        '''
 
+    '''
     # same as day18-1 init, used while debuging shoelace algo
     def __init__(self, direction, distance, color):
         self.direction = direction
         self.distance = distance
         self.color = color
+    '''
 
     def __str__(self):
         return f"{self.direction.value} {self.distance} {self.color}"
@@ -87,8 +88,8 @@ class DigPlanEntry:
 digPlan = []
 for line in lines:
     l_s = line.split()
-    # digPlan.append(DigPlanEntry(l_s[2]))
-    digPlan.append(DigPlanEntry(Direction(l_s[0]), int(l_s[1]), l_s[2]))
+    digPlan.append(DigPlanEntry(l_s[2]))
+    # digPlan.append(DigPlanEntry(Direction(l_s[0]), int(l_s[1]), l_s[2]))
 
 
 def sDigPlan(digPlan):
