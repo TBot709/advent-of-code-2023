@@ -26,4 +26,4 @@ let g:ale_fixers = {
 
 " open current project files
 tabe temp.txt
-vnew day18/day18-2.py
+vnew day19/day19-2.py
