@@ -24,8 +24,8 @@ panic_thread.start()
 start = datetime.now()
 
 # get input lines
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt", 'r')
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt", 'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
@@ -174,9 +174,10 @@ sumOfPossibleCombos = 0
 
 for ranges in acceptedPartRanges:
     productOfDiffs = 1
-    debug(f"{ranges}")
+    debug(f"{ranges} {sumOfPossibleCombos}")
     for r in ranges.ranges.values():
-        productOfDiffs *= r[1] - r[0]
+        productOfDiffs *= r[1] - r[0] + 1
+        debug(f"\t{r} {r[1] - r[0] + 1} {productOfDiffs}")
     sumOfPossibleCombos += productOfDiffs
 
 print(sumOfPossibleCombos)
