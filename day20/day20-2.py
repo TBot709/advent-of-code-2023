@@ -17,7 +17,7 @@ partNumber = "2"
 panic_thread = PanicThread(
   threading.current_thread(),
   PanicThread.ONE_GIGABYTE,
-  PanicThread.ONE_HOUR)
+  PanicThread.TEN_SECONDS)
 panic_thread.start()
 
 # start now, include file open in running time
@@ -159,9 +159,40 @@ class OutputModule(Module):
         pass
 
 
+MACHINE_MODULE_LABEL = "rx"
+
+inputsOfInputCounts = {}
+
+class MachineModule(Module):
+    def initMachineInputTracking(self):
+        for inpt in self.inputs:
+            debug(inpt)
+            for inputOfInput in modules[inpt].inputs:
+                debug(inputOfInput)
+                inputsOfInputCounts[inputOfInput] = []
+
+    def receive(self, pulse: Pulse):
+        # print(f"MACHINE: {pulse.value}")
+        pass
+
+
+def calculate_differences(numbers):
+    """
+    Given a list of numbers, calculate the differences between adjacent numbers.
+    :param numbers: List of numbers
+    :return: List of differences
+    """
+    differences = []
+    for i in range(1, len(numbers)):
+        diff = numbers[i] - numbers[i - 1]
+        differences.append(diff)
+    return differences
+
+
 modules = {}
 
 modules[OUTPUT_LABEL] = OutputModule(OUTPUT_LABEL, [])
+modules[MACHINE_MODULE_LABEL] = MachineModule(MACHINE_MODULE_LABEL, [])
 
 for line in lines:
     lineSplit = line.split(" ")
@@ -188,6 +219,9 @@ for module in modules.values():
         if output in modules:
             modules[output].addInput(module.label)
 
+# init machine modules input tracking
+modules[MACHINE_MODULE_LABEL].initMachineInputTracking()
+
 # # # # #
 # for module in modules.values():
     # debug(str(module))
@@ -209,6 +243,7 @@ while nButtonPushes < limitButtonPushes:
     nRxLowPulses = 0
     nRxHighPulses = 0
     pushButton()
+    isAllCyclesDeterminable = False
     while len(pulses) > 0:
         pulse = pulses[0]
 
@@ -236,7 +271,22 @@ while nButtonPushes < limitButtonPushes:
             debug(f"\t\toutput to non-existing module, {pulse.dest}")
             pass
 
+        if pulse.src in inputsOfInputCounts:
+            if pulse.value == PULSE_VALUE_HIGH:
+                inputsOfInputCounts[pulse.src].append(nButtonPushes)
+                debug(f"{pulse.src}:{inputsOfInputCounts[pulse.src]}")
+                debug(f"{pulse.src}:{calculate_differences(inputsOfInputCounts[pulse.src])}")
+                debug(f"{pulse.src} sends {pulse.value} pulse on button push {nButtonPushes}")
+
+        isAllCyclesDeterminable = True
+        for ioic in inputsOfInputCounts.values():
+            if len(ioic) < 2:
+                isAllCyclesDeterminable = False
+
         pulses = pulses[1:]
+
+    if isAllCyclesDeterminable:
+        break
 
     # debug(f"{nButtonPushes}: nLow = {nRxLowPulses}, nHigh = {nRxHighPulses}")
     if nButtonPushes % 10000 == 0:
@@ -252,7 +302,16 @@ while nButtonPushes < limitButtonPushes:
 debug(f"nHighPulses = {nHighPulses}, nLowPulses = {nLowPulses}, product = {nLowPulses * nHighPulses}")
 debug(f"nButtonPushes = {nButtonPushes}")
 
-print(nButtonPushes)
+
+# it just so happens that the first num button presses 
+# for each input of machine's input is equal to the cycle of button presses
+numbers = []
+for ioic in inputsOfInputCounts.values():
+    numbers.append(ioic[0])
+
+from lcm import lcm_multiple
+
+print(lcm_multiple(numbers))
 
 # # # # # # PUZZLE SOLUTION END # # # # # # #
 
