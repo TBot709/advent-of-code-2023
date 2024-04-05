@@ -17,8 +17,9 @@ vnew local-init.vim
 " macros
 let @d = "GV/DELETE BELOW THIS LINE\<CR>jxo\<ESC>"
 let @m = "@d/RUN THIS\<CR>jVy/DELETE BELOW THIS LINE\<CR>:\<C-R>\"\<CR>"
+let @r = "@d/RUN THIS\<CR>jVy/DELETE BELOW THIS LINE\<CR>:r !\<C-R>\"\<CR>"
 let @c = "^i# \<ESC>j"
-let @u = ":let oldsearch = @/\<CR>V:s/# //\<CR>:let @/ = oldsearch\<CR>"       
+let @u = ":let p = @/\<CR>V:s/# //\<CR>:let @/ = p\<CR>"       
 
 let g:ale_fixers = {
 \	'python': ['black']
