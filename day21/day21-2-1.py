@@ -6,6 +6,8 @@ from datetime import datetime
 from panic_thread import PanicThread
 from debug import debug, setDebug
 
+import math
+
 setDebug(False)
 setDebug(True)
 debug("debug is on")
@@ -73,14 +75,14 @@ GARDEN_PLOT = '.'
 ROCK = '#'
 
 
-class gridRun:
+class GridRun:
     def __init__(
             self, 
             startingCoord: (int, int), 
             mapCountToExitCoords: {int, (int, int)}):
         self.startingCoord = startingCoord
         self.grid = []
-        _initGridWithBorder()
+        self._initGridWithBorder()
         self.nSteps = 0
         self.countHistory = []
         self.isRepeating = False
@@ -88,15 +90,25 @@ class gridRun:
         self.oddRepeatCount = 0
         self.mapCountToExitCoords = mapCountToExitCoords
 
+    def __str__(self):
+        sCountHistory = "["
+        for count in self.countHistory:
+            sCountHistory += str(count) + ","
+        sCountHistory += "]"
+        return f"{self.startingCoord}: {self.nSteps}, {self.isRepeating}, {self.evenRepeatCount}, {self.oddRepeatCount} \n{sCountHistory}\n{self._strGrid()}"
+
     # border of GARDEN_PLOT as input is formatted that way
     def _initGridWithBorder(self):
-        i = 0
-        self.grid[i] = GARDEN_PLOT*nColumns
+        self.grid.append([GARDEN_PLOT]*(nColumns + 2))
+        # debug([GARDEN_PLOT]*(nColumns + 2))
         for row in gridRows:
-            i += 1
-            self.grid[i] = GARDEN_PLOT + row + GARDEN_PLOT
-        i += 1
-        self.grid[i] = GARDEN_PLOT*nColumns
+            # debug(row)
+            withBorder = [GARDEN_PLOT] + row + [GARDEN_PLOT]
+            # debug(withBorder)
+            self.grid.append(withBorder)
+        self.grid.append([GARDEN_PLOT]*(nColumns + 2))
+        # debug([GARDEN_PLOT]*(nColumns + 2))
+        debug(self._strGrid())
 
     def _strGrid(self):
         s = "\n"
@@ -121,28 +133,28 @@ class gridRun:
 
                 # North
                 if i > 0:
-                    hasNeighbour = _isNeighbour(i - 1, j)
+                    hasNeighbour = self._isNeighbour(i - 1, j)
                 if hasNeighbour:
                     nextCoords.append((i, j))
                     hasNeighbour = False
                     continue
                 # West
                 if j > 0:
-                    hasNeighbour = _isNeighbour(i, j - 1)
+                    hasNeighbour = self._isNeighbour(i, j - 1)
                 if hasNeighbour:
                     nextCoords.append((i, j))
                     hasNeighbour = False
                     continue
                 # East
                 if j < nColumnsMinusOne:
-                    hasNeighbour = _isNeighbour(i, j + 1)
+                    hasNeighbour = self._isNeighbour(i, j + 1)
                 if hasNeighbour:
                     nextCoords.append((i, j))
                     hasNeighbour = False
                     continue
                 # South
                 if i < nRowsMinusOne:
-                    hasNeighbour = _isNeighbour(i + 1, j)
+                    hasNeighbour = self._isNeighbour(i + 1, j)
                 if hasNeighbour:
                     nextCoords.append((i, j))
                     hasNeighbour = False
@@ -159,7 +171,7 @@ class gridRun:
             self.grid[nextCoord[0]][nextCoord[1]] = REACHABLE_POSITION
 
         # get reachable count
-        countHistory.append(_getReachableCount())
+        self.countHistory.append(self._getReachableCount())
 
         # detect exits
         # for i, row in enumerate(self.grid):
@@ -181,20 +193,21 @@ class gridRun:
                     # self.grid[i][j] = GARDEN_PLOT
 
         # detect repeats
-        if countHistory[-1] == countHistory[-3]:
+        if len(self.countHistory) > 3 and \
+                self.countHistory[-1] == self.countHistory[-3]:
             self.isRepeating = True
-            if nSteps%2 == 0:
-                self.evenRepeatCount = countHistory[-1]
-                self.oddRepeatCount = countHistory[-2]
+            if self.nSteps%2 == 0:
+                self.evenRepeatCount = self.countHistory[-1]
+                self.oddRepeatCount = self.countHistory[-2]
             else:
-                self.oddRepeatCount = countHistory[-1]
-                self.evenRepeatCount = countHistory[-2]
+                self.oddRepeatCount = self.countHistory[-1]
+                self.evenRepeatCount = self.countHistory[-2]
 
         # # # # #
         # debug(strGridRows())
         # # # # #
 
-    def _isNeighbour(self):
+    def _isNeighbour(self, i, j):
         return self.grid[i][j] == REACHABLE_POSITION
 
     def _getReachableCount(self):
@@ -209,6 +222,24 @@ class gridRun:
 # # # # #
 debug(strGridRows())
 # # # # #
+
+mapGridRuns = {} # (startingCoord, GridRun)
+
+startingI = math.ceil(nRows/2)
+startingJ = math.ceil(nColumns/2)
+startingCoord = (startingI, startingJ)
+mapGridRuns[startingCoord] = GridRun(startingCoord,{})
+
+debug(mapGridRuns.keys())
+
+while (len(mapGridRuns) > 0):
+    for mgr in mapGridRuns.values():
+        while True:
+            mgr.step()
+            debug(str(mgr))
+            if mgr.isRepeating:
+                mapGridRuns.pop(mgr.startingCoord)
+                break
 
 print(nReachable)
 
