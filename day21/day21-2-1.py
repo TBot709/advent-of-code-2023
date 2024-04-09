@@ -46,11 +46,13 @@ nColumnsMinusOne = nColumns - 1
 
 STARTING_POSITION = 'S'
 REACHABLE_POSITION = 'O'
+GARDEN_PLOT = '.'
 
 gridRows = []
 
 for line in lines:
-    line = line.replace(STARTING_POSITION, REACHABLE_POSITION)
+    # line = line.replace(STARTING_POSITION, REACHABLE_POSITION)
+    line = line.replace(STARTING_POSITION, GARDEN_PLOT)
     row = []
     for c in line:
         row.append(c)
@@ -71,31 +73,27 @@ debug(strGridRows())
 # # # # #
 
 STARTING_POSITION = 'S'
-GARDEN_PLOT = '.'
 ROCK = '#'
 
 
 class GridRun:
-    def __init__(
-            self, 
-            startingCoord: (int, int), 
-            mapCountToExitCoords: {int, (int, int)}):
-        self.startingCoord = startingCoord
+    def __init__(self):
         self.grid = []
         self._initGridWithBorder()
+        self.gridHeightMinusOne = len(self.grid) - 1
+        self.gridWidthMinusOne = len(self.grid[0]) - 1
         self.nSteps = 0
         self.countHistory = []
         self.isRepeating = False
         self.evenRepeatCount = 0
         self.oddRepeatCount = 0
-        self.mapCountToExitCoords = mapCountToExitCoords
 
     def __str__(self):
         sCountHistory = "["
         for count in self.countHistory:
             sCountHistory += str(count) + ","
         sCountHistory += "]"
-        return f"{self.startingCoord}: {self.nSteps}, {self.isRepeating}, {self.evenRepeatCount}, {self.oddRepeatCount} \n{sCountHistory}\n{self._strGrid()}"
+        return f"{self.nSteps}, {self.isRepeating}, {self.evenRepeatCount}, {self.oddRepeatCount} \n{sCountHistory}\n{self._strGrid()}"
 
     # border of GARDEN_PLOT as input is formatted that way
     def _initGridWithBorder(self):
@@ -107,8 +105,13 @@ class GridRun:
             # debug(withBorder)
             self.grid.append(withBorder)
         self.grid.append([GARDEN_PLOT]*(nColumns + 2))
+
+        sp = self.getStartPosition()
+        debug(sp)
+        self.grid[sp[0]][sp[1]] = REACHABLE_POSITION
+
         # debug([GARDEN_PLOT]*(nColumns + 2))
-        debug(self._strGrid())
+        debug(f"\n{self._strGrid()}")
 
     def _strGrid(self):
         s = "\n"
@@ -146,14 +149,14 @@ class GridRun:
                     hasNeighbour = False
                     continue
                 # East
-                if j < nColumnsMinusOne:
+                if j < self.gridWidthMinusOne:
                     hasNeighbour = self._isNeighbour(i, j + 1)
                 if hasNeighbour:
                     nextCoords.append((i, j))
                     hasNeighbour = False
                     continue
                 # South
-                if i < nRowsMinusOne:
+                if i < self.gridHeightMinusOne:
                     hasNeighbour = self._isNeighbour(i + 1, j)
                 if hasNeighbour:
                     nextCoords.append((i, j))
@@ -173,30 +176,11 @@ class GridRun:
         # get reachable count
         self.countHistory.append(self._getReachableCount())
 
-        # detect exits
-        # for i, row in enumerate(self.grid):
-            # if i == 0:
-                # for j, c in enumerate(row):
-                    # if c == REACHABLE_POSITION:
-                        # self.mapCountToExitCoords[self.nSteps] = 
-                            # (len(self.grid) - 1), j)
-            # elif i == len(self.grid - 1):
-                # for j, c in enumerate(row):
-                    # if c == REACHABLE_POSITION:
-                        # self.mapCountToExitCoords[self.nSteps] = 
-                            # (0, j)
-            # else:
-                # if row[0] == REACHABLE_POSITION:
-                   #  
-            # for j, c in enumerate(row):
-                # if c == REACHABLE_POSITION:
-                    # self.grid[i][j] = GARDEN_PLOT
-
         # detect repeats
         if len(self.countHistory) > 3 and \
                 self.countHistory[-1] == self.countHistory[-3]:
             self.isRepeating = True
-            if self.nSteps%2 == 0:
+            if self.nSteps % 2 == 0:
                 self.evenRepeatCount = self.countHistory[-1]
                 self.oddRepeatCount = self.countHistory[-2]
             else:
@@ -212,36 +196,187 @@ class GridRun:
 
     def _getReachableCount(self):
         nReachable = 0
-        for row in self.grid:
-            for c in row:
-                if c == REACHABLE_POSITION:
-                    nReachable += 1
+        for i, row in enumerate(self.grid):
+            # if not border row
+            if i > 0 and i < len(self.grid) - 1:
+                for j, c in enumerate(row):
+                    if j > 0 and j < len(row) - 1 and \
+                            c == REACHABLE_POSITION:
+                        nReachable += 1
         return nReachable
+
+    def getStartPosition(self):
+        raise NotImplementedError()
+
+    def generateExitGridRuns(self, nSteps):
+        raise NotImplementedError()
+
+
+KEY_CENTER = "C"
+KEY_NORTH = "N"
+KEY_SOUTH = "S"
+KEY_EAST = "E"
+KEY_WEST = "W"
+KEY_SE = "SE"
+KEY_SW = "SW"
+KEY_NE = "NE"
+KEY_NW = "NW"
+
+
+class NorthGridRun(GridRun):
+    def getStartPosition(self):
+        return (0, math.ceil(nColumns/2))
+
+    def generateExitGridRuns(self, nSteps):
+        if nSteps == nRows:
+            return {KEY_NORTH: NorthGridRun()}
+        else:
+            return []
+
+
+class SouthGridRun(GridRun):
+    def getStartPosition(self):
+        return (nRows - 1 + 2, math.ceil(nColumns/2))  # plus 2 for border
+
+    def generateExitGridRuns(self, nSteps):
+        if nSteps == nRows:
+            return {KEY_SOUTH: SouthGridRun()}
+        else:
+            return []
+
+
+class WestGridRun(GridRun):
+    def getStartPosition(self):
+        return (math.ceil(nRows/2), 0)
+
+    def generateExitGridRuns(self, nSteps):
+        if nSteps == nColumns:
+            return {KEY_WEST: WestGridRun()}
+        else:
+            return []
+
+
+class EastGridRun(GridRun):
+    def getStartPosition(self):
+        return (math.ceil(nRows/2), nColumns - 1 + 2)  # plus 2 for border
+
+    def generateExitGridRuns(self, nSteps):
+        if nSteps == nColumns:
+            return {KEY_EAST: EastGridRun()}
+        else:
+            return []
+
+
+class DiagonalGridRun(GridRun):
+
+    def getKey():
+        raise NotImplementedError()
+
+    def getNewInstance():
+        raise NotImplementedError()
+
+    def generateExitGridRuns(self, nSteps):
+        if nSteps == nRows * 2:  # assuming grid is square
+            return {self.getKey(): self.getNewInstance()}
+        else:
+            return []
+
+
+class NEGridRun(DiagonalGridRun):
+    def getKey():
+        return KEY_NE
+
+    def getStartPosition(self):
+        return (0, 0)
+
+
+class NWGridRun(DiagonalGridRun):
+    def getKey():
+        return KEY_NW
+
+    def getStartPosition(self):
+        return (0, nColumns - 1 + 2)  # plus two for border
+
+
+class SEGridRun(DiagonalGridRun):
+    def getKey():
+        return KEY_SE
+
+    def getStartPosition(self):
+        return (nRows - 1 + 2, 0)  # plus two for border
+
+
+class SWGridRun(DiagonalGridRun):
+    def getKey():
+        return KEY_SW
+
+    def getStartPosition(self):
+        return (nRows - 1 + 2, nColumns - 1 + 2)  # plus two for border
+
+
+class CenterGridRun(GridRun):
+    def getKey(self):
+        return KEY_CENTER
+
+    def getStartPosition(self):
+        return (math.ceil(nRows/2), math.ceil(nColumns/2))
+
+    def generateExitGridRuns(self, nSteps):
+        if nSteps == math.floor(nRows/2):  # assuming square grid
+            return {KEY_NORTH: NorthGridRun(),
+                    KEY_SOUTH: SouthGridRun(),
+                    KEY_WEST: WestGridRun(),
+                    KEY_EAST: EastGridRun()}
+        elif nSteps == nRows:  # assuming square grid
+            return {KEY_NE: NEGridRun(),
+                    KEY_SE: SEGridRun(),
+                    KEY_NW: NWGridRun(),
+                    KEY_SW: SWGridRun()}
+        else:
+            return []
 
 
 # # # # #
 debug(strGridRows())
 # # # # #
 
-mapGridRuns = {} # (startingCoord, GridRun)
+mapGridRuns = {KEY_CENTER: CenterGridRun()}  # (startingCoord, GridRun)
 
-startingI = math.ceil(nRows/2)
-startingJ = math.ceil(nColumns/2)
-startingCoord = (startingI, startingJ)
-mapGridRuns[startingCoord] = GridRun(startingCoord,{})
+nSteps = 0
+repeatingGridRuns = {}
 
 debug(mapGridRuns.keys())
 
 while (len(mapGridRuns) > 0):
-    for mgr in mapGridRuns.values():
+    repeatingGridRunKeys = []
+    newGridRuns = {}
+    for key, mgr in mapGridRuns.items():
         while True:
-            mgr.step()
-            debug(str(mgr))
             if mgr.isRepeating:
-                mapGridRuns.pop(mgr.startingCoord)
                 break
+            nSteps += 1
+            mgr.step()
+            newRuns = mgr.generateExitGridRuns(nSteps)
+            if len(newRuns) > 0:
+                for k, newRun in newRuns.items():
+                    if not (k in repeatingGridRunKeys or
+                            k in mapGridRuns):
+                        newGridRuns[k] = newRun
+            debug(str(mgr))
+        if mgr.isRepeating:
+            repeatingGridRunKeys.append(key)
+            continue
+    for key in repeatingGridRunKeys:
+        debug(f"repeating grid run key: {key}")
+        repeatingGridRuns[key] = mapGridRuns[key]
+        mapGridRuns.pop(key)
+    if len(newGridRuns) > 0:
+        mapGridRuns = {**newGridRuns, **mapGridRuns}
 
-print(nReachable)
+for key, mgr in repeatingGridRuns.items():
+    debug(f"{key}, {mgr}")
+
+print(0)
 
 # # # # # # PUZZLE SOLUTION END # # # # # # #
 
