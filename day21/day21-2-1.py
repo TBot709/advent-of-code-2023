@@ -19,22 +19,24 @@ partNumber = "1"
 panic_thread = PanicThread(
   threading.current_thread(),
   PanicThread.ONE_GIGABYTE,
-  PanicThread.TEN_SECONDS)
+  # PanicThread.TEN_SECONDS)
+  PanicThread.TWO_MINUTES)
 panic_thread.start()
 
 # start now, include file open in running time
 start = datetime.now()
 
 # get input lines
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input-simple.txt", 'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input-simple.txt", 'r')
 # file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt", 'r')
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input-2.txt", 'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
 nColumns = len(lines[0])
 file.close()
-# debug(f"rows: {nRows}, columns: {nColumns}")
+debug(f"rows: {nRows}, columns: {nColumns}")
 # debug(f"{lines}")
 
 print(f"# # # # # day{puzzleNumber}-{partNumber} # # # # #")
@@ -94,6 +96,7 @@ class GridRun:
             sCountHistory += str(count) + ","
         sCountHistory += "]"
         return f"{self.nSteps}, {self.isRepeating}, {self.evenRepeatCount}, {self.oddRepeatCount} \n{sCountHistory}\n{self._strGrid()}"
+        # return f"{self.nSteps}, {self.isRepeating}, {self.evenRepeatCount}, {self.oddRepeatCount} \n{sCountHistory}"
 
     # border of GARDEN_PLOT as input is formatted that way
     def _initGridWithBorder(self):
@@ -111,7 +114,7 @@ class GridRun:
         self.grid[sp[0]][sp[1]] = REACHABLE_POSITION
 
         # debug([GARDEN_PLOT]*(nColumns + 2))
-        debug(f"\n{self._strGrid()}")
+        # debug(f"\n{self._strGrid()}")
 
     def _strGrid(self):
         s = "\n"
@@ -322,12 +325,14 @@ class CenterGridRun(GridRun):
         return (math.ceil(nRows/2), math.ceil(nColumns/2))
 
     def generateExitGridRuns(self, nSteps):
-        if nSteps == math.floor(nRows/2):  # assuming square grid
+        if nSteps == math.ceil(nRows/2):  # assuming square grid
+            debug("center cardinal exits")
             return {KEY_NORTH: NorthGridRun(),
                     KEY_SOUTH: SouthGridRun(),
                     KEY_WEST: WestGridRun(),
                     KEY_EAST: EastGridRun()}
         elif nSteps == nRows:  # assuming square grid
+            debug("diagonal cardinal exits")
             return {KEY_NE: NEGridRun(),
                     KEY_SE: SEGridRun(),
                     KEY_NW: NWGridRun(),
@@ -340,9 +345,9 @@ class CenterGridRun(GridRun):
 debug(strGridRows())
 # # # # #
 
+nSteps = 0
 mapGridRuns = {KEY_CENTER: CenterGridRun()}  # (startingCoord, GridRun)
 
-nSteps = 0
 repeatingGridRuns = {}
 
 debug(mapGridRuns.keys())
@@ -362,7 +367,9 @@ while (len(mapGridRuns) > 0):
                     if not (k in repeatingGridRunKeys or
                             k in mapGridRuns):
                         newGridRuns[k] = newRun
-            debug(str(mgr))
+            # debug(mgr.nSteps)
+            if mgr.nSteps in [nRows, math.floor(nRows/2), nRows + math.floor(nRows/2)]:
+                debug(str(mgr))
         if mgr.isRepeating:
             repeatingGridRunKeys.append(key)
             continue
@@ -376,7 +383,87 @@ while (len(mapGridRuns) > 0):
 for key, mgr in repeatingGridRuns.items():
     debug(f"{key}, {mgr}")
 
-print(0)
+stepLimit = 26501365
+# stepLimit = 131 + 131 + 131 + 65
+stepLimitMinusFirstCenterExitSteps = stepLimit - math.floor(nRows/2)
+nGridsNorthAfterCenter = \
+        math.floor(stepLimitMinusFirstCenterExitSteps/nRows)
+nRemainderNorth = stepLimitMinusFirstCenterExitSteps % nRows
+# isRemainderPastHalf = nRemainderNorth >= math.floor(nRows/2)
+
+debug(f"{stepLimit}, {stepLimitMinusFirstCenterExitSteps}, {nGridsNorthAfterCenter}, {nRemainderNorth}")
+
+nFullGridsNorth = nGridsNorthAfterCenter - 1
+# if remainder is not past half, second to last full sqaure is not full
+# if not isRemainderPastHalf:
+    # nFullGridsNorth -= 1
+
+# hogben's central polygonal numbers
+nFullGrids = 2 * (nFullGridsNorth*nFullGridsNorth) + 2 * nFullGridsNorth + 1
+
+
+debug(f"nRemainderNorth:{nRemainderNorth}, nFullGridsNorth:{nFullGridsNorth}, nFullGrids: {nFullGrids}")
+
+nStepsPastFullGrids = nRemainderNorth
+# if not isRemainderPastHalf:
+    # nStepsPastFullGrids += nRows
+
+# determine count for full grid, key is arbitrary assuming all grids reach same numbers
+isEven = stepLimit % 2 == 0
+nCountForFullGrid = 0
+if isEven:
+    nCountForFullGrid = repeatingGridRuns[KEY_NORTH].evenRepeatCount
+else:
+    nCountForFullGrid = repeatingGridRuns[KEY_NORTH].oddRepeatCount
+
+debug(f"{nStepsPastFullGrids}, {nCountForFullGrid}")
+
+totalCount = 0
+
+# full grids
+totalCount += nCountForFullGrid * nFullGrids
+
+debug(totalCount)
+
+# 4 leading corners
+for key in [KEY_NORTH, KEY_WEST, KEY_SOUTH, KEY_EAST]:
+    # debug(f"{key} {repeatingGridRuns[key].countHistory[nRows]}")
+    totalCount += repeatingGridRuns[key].countHistory[nRows - 1]
+    # if not isRemainderPastHalf:
+        # totalCount += repeatingGridRuns[key].countHistory[nStepsPastFullGrids]
+
+debug(totalCount)
+
+# non-full sides, outter
+for i in range(nFullGridsNorth):
+    for key in [KEY_NE, KEY_NW, KEY_SE, KEY_SW]:
+        # debug(f"{key} {repeatingGridRuns[key].countHistory[math.floor(nRows/2)]}")
+        totalCount += repeatingGridRuns[key].countHistory[math.floor(nRows/2) - 1]
+
+debug(totalCount)
+
+# non-full sides, inner
+for i in range(nFullGridsNorth - 1):
+    for key in [KEY_NE, KEY_NW, KEY_SE, KEY_SW]:
+        # debug(f"{key} {repeatingGridRuns[key].countHistory[nRows + math.floor(nRows/2)]}")
+        totalCount += repeatingGridRuns[key].countHistory[nRows + math.floor(nRows/2) - 1]
+
+
+debug(f"N partial: {repeatingGridRuns[KEY_NORTH].countHistory[nRows - 1]}")
+debug(f"W partial: {repeatingGridRuns[KEY_WEST].countHistory[nRows - 1]}")
+debug(f"E partial: {repeatingGridRuns[KEY_EAST].countHistory[nRows - 1]}")
+debug(f"S partial: {repeatingGridRuns[KEY_SOUTH].countHistory[nRows - 1]}")
+debug(f"NW 1/4: {repeatingGridRuns[KEY_NW].countHistory[math.floor(nRows/2) - 1]}")
+debug(f"NE 1/4: {repeatingGridRuns[KEY_NE].countHistory[math.floor(nRows/2) - 1]}")
+debug(f"SW 1/4: {repeatingGridRuns[KEY_SW].countHistory[math.floor(nRows/2) - 1]}")
+debug(f"SE 1/4: {repeatingGridRuns[KEY_SE].countHistory[math.floor(nRows/2) - 1]}")
+debug(f"NW 3/4: {repeatingGridRuns[KEY_NW].countHistory[nRows + math.floor(nRows/2) - 1]}")
+debug(f"NE 3/4: {repeatingGridRuns[KEY_NE].countHistory[nRows + math.floor(nRows/2) - 1]}")
+debug(f"SW 3/4: {repeatingGridRuns[KEY_SW].countHistory[nRows + math.floor(nRows/2) - 1]}")
+debug(f"SE 3/4: {repeatingGridRuns[KEY_SE].countHistory[nRows + math.floor(nRows/2) - 1]}")
+
+
+print(totalCount)
 
 # # # # # # PUZZLE SOLUTION END # # # # # # #
 
