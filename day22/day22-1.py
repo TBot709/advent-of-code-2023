@@ -101,8 +101,60 @@ class Block:
         self.isEastToWest = not self.isOneCube and not self.isVertical and \
                 not self.isNorthToSouth
 
+        self.symbol = None
+
+        self.cubes = []
+        self._initCubes()
+
+    def _initCubes(self):
+        if self.isOneCube:
+            self.cubes.append(self.start)
+            return
+
+        q = None
+
+        offsetFn = None
+        def up():
+            q.z += 1
+        def south():
+            q.y += 1
+        def east():
+            q.x += 1
+
+        end = None
+        if self.isVertical:
+            offsetFn = up
+            q = self.bottom
+            end = self.top
+        elif self.isNorthToSouth:
+            offsetFn = south
+            q = self.north
+            end = self.south
+        elif self.isEastToWest:
+            offsetFn = east
+            q = self.west
+            end = self.east
+        else:
+            raise Exception("self.without direction flag set")
+        
+        debug(f"q = {q}, end = {end}, {self.isVertical}, {self.isNorthToSouth}, {self.isEastToWest}")
+
+        while not q == end:
+            self.cubes.append(Coord(q.x, q.y, q.z))
+            debug(f"\t{q}: {self}")
+            offsetFn()
+        self.cubes.append(Coord(q.x, q.y, q.z))
+        debug(f"\t{q}: {self}")
+    
     def __str__(self):
-        return f"{self.start}~{self.end}  <- {self.symbol}"
+        sCubes = "["
+        for cube in self.cubes:
+            sCubes += f"{cube}, "
+        sCubes += "]"
+        sSymbol = ""
+        if self.symbol is not None:
+            sSymbol += f"  <- {self.symbol}"
+        return f"{self.start}~{self.end}  <- {sSymbol},  {sCubes}"
 
     def __lt__(self, other):
         return self.bottom < other.bottom or \
@@ -159,44 +211,10 @@ layers = [[[EMPTY for _ in range(maxX + 1)] for _ in range(maxY + 1)] for _ in r
 debug(f"layers list {len(layers)} {len(layers[0])} {len(layers[0][0])}")
 
 for block in blocks:
-    if block.isOneCube:
-        layers[block.start.z][block.start.y][block.start.x] = block.symbol
-        continue
-
-    q = None
-
-    offsetFn = None
-    def up():
-        q.z += 1
-    def south():
-        q.y += 1
-    def east():
-        q.x += 1
-
-    end = None
-    if block.isVertical:
-        offsetFn = up
-        q = block.bottom
-        end = block.top
-    elif block.isNorthToSouth:
-        offsetFn = south
-        q = block.north
-        end = block.south
-    elif block.isEastToWest:
-        offsetFn = east
-        q = block.west
-        end = block.east
-    else:
-        raise Exception("block without direction flag set")
-
-    # debug(f"q = {q}, end = {end}, {block.isVertical}, {block.isNorthToSouth}, {block.isEastToWest}")
-
-    while not q == end:
-        # debug(f"\t{q}")
-        layers[q.z][q.y][q.x] = block.symbol
-        offsetFn()
-    # debug(f"\t{q}")
-    layers[q.z][q.y][q.x] = block.symbol
+    debug(len(block.cubes))
+    for cube in block.cubes:
+        debug(cube)
+        layers[cube.z][cube.y][cube.x] = block.symbol
 
 def strLayers():
     s = "\n"
@@ -209,6 +227,8 @@ def strLayers():
     return s
 
 debug(strLayers())
+
+# gravity step
 
 print(0)
 
