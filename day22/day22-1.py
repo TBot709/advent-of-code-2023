@@ -24,9 +24,9 @@ panic_thread.start()
 start = datetime.now()
 
 # get input lines
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input-2.txt", 'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input-2.txt", 'r')
 # file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt", 'r')
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
@@ -136,15 +136,18 @@ class Block:
             end = self.east
         else:
             raise Exception("self.without direction flag set")
+
+        # copy
+        q = Coord(q.x, q.y, q.z)
         
-        debug(f"q = {q}, end = {end}, {self.isVertical}, {self.isNorthToSouth}, {self.isEastToWest}")
+        # debug(f"q = {q}, end = {end}, {self.isVertical}, {self.isNorthToSouth}, {self.isEastToWest}")
 
         while not q == end:
             self.cubes.append(Coord(q.x, q.y, q.z))
-            debug(f"\t{q}: {self}")
+            # debug(f"\t{q}: {self}")
             offsetFn()
         self.cubes.append(Coord(q.x, q.y, q.z))
-        debug(f"\t{q}: {self}")
+        # debug(f"\t{q}: {self}, {self.bottom}")
     
     def __str__(self):
         sCubes = "["
@@ -192,7 +195,7 @@ for line in lines:
     
     blocks.append(block)
 
-debug(f"{maxX} {maxY}")
+# debug(f"{maxX} {maxY}")
 
 blocks.sort()
 
@@ -202,18 +205,17 @@ for i, block in enumerate(blocks):
 # debug(strBlocks(blocks))
 
 maxZ = blocks[-1].top.z
-debug(maxZ)
+# debug(maxZ)
 
 EMPTY = '.'
 
 layers = [[[EMPTY for _ in range(maxX + 1)] for _ in range(maxY + 1)] for _ in range(maxZ + 1)]
 
-debug(f"layers list {len(layers)} {len(layers[0])} {len(layers[0][0])}")
+# debug(f"layers list {len(layers)} {len(layers[0])} {len(layers[0][0])}")
 
 for block in blocks:
-    debug(len(block.cubes))
     for cube in block.cubes:
-        debug(cube)
+        # debug(cube)
         layers[cube.z][cube.y][cube.x] = block.symbol
 
 def strLayers():
@@ -228,9 +230,59 @@ def strLayers():
 
 debug(strLayers())
 
-# gravity step
 
-print(0)
+def isFloating(block):
+    isFloating = True
+    if block.isVertical:
+        cube = block.cubes[0]
+        # debug(f"{cube} {block.bottom}, {block.top}, {block.symbol}, {block}")
+        if cube.z == 1 or layers[cube.z - 1][cube.y][cube.x] != EMPTY:
+            isFloating = False
+    else:
+        for cube in block.cubes:
+            if cube.z == 1 or layers[cube.z - 1][cube.y][cube.x] != EMPTY:
+                isFloating = False
+                break
+    return isFloating
+
+
+# let blocks fall
+isAllLanded = False
+while not isAllLanded:
+    isAllLanded = True
+    for block in blocks:
+        if isFloating(block):
+            isAllLanded = False
+            for cube in block.cubes:
+                layers[cube.z][cube.y][cube.x] = EMPTY
+                layers[cube.z - 1][cube.y][cube.x] = block.symbol
+                cube.z -= 1
+            
+debug(strLayers())
+
+
+def isAllLandedIfBlockWasRemoved(block):
+    isAllLanded = True
+    for cube in block.cubes:
+        layers[cube.z][cube.y][cube.x] = EMPTY
+    for b in blocks:
+        if b == block:
+            continue
+        if isFloating(b):
+            isAllLanded = False
+            break
+    for cube in block.cubes:
+        layers[cube.z][cube.y][cube.x] = block.symbol
+    return isAllLanded
+
+
+removableCount = 0
+for block in blocks:
+    if isAllLandedIfBlockWasRemoved(block):
+        debug(f"removable: {block}")
+        removableCount += 1
+
+print(removableCount)
 
 # # # # # # PUZZLE SOLUTION END # # # # # # #
 
