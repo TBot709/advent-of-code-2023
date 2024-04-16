@@ -19,3 +19,4 @@ sed -i "s/partNumber = \"0\"/partNumber = \"2\"/g" "day${n}-2.py"
 touch "day${n}_input.txt"
 touch "day${n}_example-input.txt"
 
+#sed -i "s/vnew day??/day??-1.py/vnew day${n}\/day${n}-1.py/g" "local-init.vim"
