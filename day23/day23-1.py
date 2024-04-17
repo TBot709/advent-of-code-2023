@@ -24,8 +24,10 @@ panic_thread.start()
 start = datetime.now()
 
 # get input lines
-file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt", 'r')
-# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}-smaller-input.txt", 'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}-small-input.txt", 'r')
+# file = open(f"./day{puzzleNumber}/day{puzzleNumber}_example-input.txt", 'r')
+file = open(f"./day{puzzleNumber}/day{puzzleNumber}_input.txt",'r')
 lines = file.readlines()
 lines = list(map(lambda line: line.strip('\n'), lines))
 nRows = len(lines)
@@ -158,7 +160,7 @@ class Node:
 
 
 endNodeCoord = (nColumns - 2, nRows - 1)
-debug(f"{endNodeCoord}")
+debug(f"endNodeCoord: {endNodeCoord}")
 # endNode = Node(endNodeCoord)
 startNode = Node((1, 0))
 startNode.exitSlopeCoords[SOUTH] = (1, 0)
@@ -187,7 +189,7 @@ for departNode in nodes:
             nextDir = ""
             for nxtD in directions:
                 nxt = getTranslation(c, nxtD)
-                debug(f"\t\tcurrent:{c} {nxtD} next:{nxt} prev:{prevC} steps:{stepCount}")
+                # debug(f"\t\tcurrent:{c} {nxtD} next:{nxt} prev:{prevC} steps:{stepCount}")
                 if prevC is not None and nxt == prevC:
                     continue
 
@@ -206,13 +208,23 @@ for departNode in nodes:
                     prevC = tuple(nxt)
                     c = getSlopeTranslation(nxt, getCharAtCoord(nxt))
                     stepCount += 2
-                    nodes.append(Node(tuple(c)))
+
                     if c not in adjacencies:
+                        nodes.append(Node(tuple(c)))
                         adjacencies[tuple(c)] = {}
-                    adjacencies[tuple(c)][departNode.coord] = stepCount
+
+                    # only keep longer path if multipl exist
+                    if departNode.coord not in adjacencies[tuple(c)]:
+                        adjacencies[tuple(c)][departNode.coord] = 0
+
+                    if adjacencies[tuple(c)][departNode.coord] < stepCount:
+                        adjacencies[tuple(c)][departNode.coord] = stepCount
+
                     debug(str(nodes[-1]))
                     isSlopeReached = True
                     break
+
+debug(f"num nodes = {len(nodes)}")
 
 for node in nodes:
     grid[node.coord[1]][node.coord[0]] = 'N'
@@ -221,18 +233,29 @@ debug(strGrid())
 
 debug(adjacencies)
 
-maxPath = 0
-currentNodeCoord = endNodeCoord
-while currentNodeCoord != startNode.coord:
-    maxDist = 0
-    maxDistCoord = ()
+paths = []
+
+
+def findPath(pathSoFar: [((int, int), int)]):
+    currentNodeCoord = pathSoFar[-1][0]
+    if currentNodeCoord == startNode.coord:
+        paths.append(pathSoFar)
     for coord, distance in adjacencies[currentNodeCoord].items():
-        if distance > maxDist:
-            maxDist = distance
-            maxDistCoord = coord
-    maxPath += maxDist
-    debug(f"current: {currentNodeCoord}, maxDist: {maxDist}, maxDistCoord: {maxDistCoord}")
-    currentNodeCoord = maxDistCoord
+        p = list(pathSoFar)
+        p.append((coord, distance))
+        findPath(p)
+
+
+findPath([(endNodeCoord, 0)])
+
+debug(str(paths).replace('],','],\n'))
+
+pathLengths = \
+    list(map(lambda p: sum(map(lambda n: n[1], p)) + len(p) - 2, paths))
+
+debug(pathLengths)
+
+maxPath = max(pathLengths)
 
 print(maxPath)
 
