@@ -9,8 +9,8 @@ py -m day01.day01-1
 
 # Completion table
 
-| - | - | - | - |
 | day | 0 stars | 1 star | 2 stars |
+| ------- | --- | --- | --- |
 | 1 | | | x |
 | 2 | | | x |
 | 3 | | | x |
